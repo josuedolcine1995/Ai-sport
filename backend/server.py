@@ -10,7 +10,8 @@ from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timedelta
 import re
-import random
+import httpx
+import asyncio
 import json
 
 ROOT_DIR = Path(__file__).parent
@@ -27,63 +28,12 @@ app = FastAPI()
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
-# Mock Sports Data
-PLAYERS = {
-    "lebron james": {
-        "name": "LeBron James",
-        "team": "Los Angeles Lakers",
-        "position": "Forward",
-        "season_avg": {
-            "points": 25.3,
-            "rebounds": 7.3,
-            "assists": 7.4,
-            "minutes": 35.5
-        },
-        "recent_games": [
-            {"date": "2025-06-20", "points": 28, "rebounds": 6, "assists": 11},
-            {"date": "2025-06-18", "points": 19, "rebounds": 8, "assists": 6},
-            {"date": "2025-06-15", "points": 30, "rebounds": 9, "assists": 9}
-        ]
-    },
-    "stephen curry": {
-        "name": "Stephen Curry",
-        "team": "Golden State Warriors",
-        "position": "Guard",
-        "season_avg": {
-            "points": 29.5,
-            "rebounds": 4.9,
-            "assists": 6.2,
-            "threes": 4.8
-        },
-        "recent_games": [
-            {"date": "2025-06-20", "points": 32, "rebounds": 4, "assists": 7, "threes": 6},
-            {"date": "2025-06-18", "points": 27, "rebounds": 5, "assists": 8, "threes": 5},
-            {"date": "2025-06-15", "points": 35, "rebounds": 3, "assists": 4, "threes": 7}
-        ]
-    },
-    "patrick mahomes": {
-        "name": "Patrick Mahomes",
-        "team": "Kansas City Chiefs",
-        "position": "Quarterback",
-        "season_avg": {
-            "passing_yards": 287.2,
-            "touchdowns": 2.1,
-            "completions": 24.8,
-            "rating": 98.5
-        },
-        "recent_games": [
-            {"date": "2025-06-15", "passing_yards": 312, "touchdowns": 3, "completions": 28},
-            {"date": "2025-06-08", "passing_yards": 268, "touchdowns": 2, "completions": 22},
-            {"date": "2025-06-01", "passing_yards": 295, "touchdowns": 1, "completions": 26}
-        ]
-    }
-}
-
-TEAMS = {
-    "lakers": {"name": "Los Angeles Lakers", "record": "45-20", "next_game": "vs Warriors"},
-    "warriors": {"name": "Golden State Warriors", "record": "42-23", "next_game": "@ Lakers"},
-    "chiefs": {"name": "Kansas City Chiefs", "record": "12-2", "next_game": "vs Bills"}
-}
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Models
 class ChatMessage(BaseModel):
@@ -95,24 +45,265 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     message: str
 
-class BettingOdds(BaseModel):
-    player: str
-    stat: str
-    line: float
-    over_odds: int
-    under_odds: int
-    confidence: int
+class PlayerStats(BaseModel):
+    name: str
+    team: str
+    position: str
+    stats: Dict[str, Any]
+    recent_games: List[Dict[str, Any]]
+
+# Real Data Services
+class SportsDataService:
+    def __init__(self):
+        self.base_urls = {
+            'balldontlie': 'https://www.balldontlie.io/api/v1',
+            'nba_stats': 'https://stats.nba.com/stats',
+            'sportsdb': 'https://www.thesportsdb.com/api/v1/json/3',
+            'odds_api': 'https://api.the-odds-api.com/v4'
+        }
+        self.cache_ttl = 300  # 5 minutes cache
+    
+    async def get_cached_data(self, cache_key: str):
+        """Get cached data from MongoDB"""
+        try:
+            cached = await db.cache.find_one({"key": cache_key})
+            if cached and cached.get("expires_at", datetime.min) > datetime.utcnow():
+                return cached.get("data")
+        except Exception as e:
+            logger.error(f"Cache read error: {e}")
+        return None
+    
+    async def set_cache_data(self, cache_key: str, data: Any, ttl_minutes: int = 5):
+        """Cache data in MongoDB with TTL"""
+        try:
+            expires_at = datetime.utcnow() + timedelta(minutes=ttl_minutes)
+            await db.cache.replace_one(
+                {"key": cache_key},
+                {
+                    "key": cache_key,
+                    "data": data,
+                    "expires_at": expires_at,
+                    "created_at": datetime.utcnow()
+                },
+                upsert=True
+            )
+        except Exception as e:
+            logger.error(f"Cache write error: {e}")
+    
+    async def fetch_nba_players(self):
+        """Fetch real NBA players from Ball Don't Lie API"""
+        cache_key = "nba_players_list"
+        cached_data = await self.get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+        
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                response = await client.get(f"{self.base_urls['balldontlie']}/players?per_page=100")
+                if response.status_code == 200:
+                    data = response.json()
+                    players_data = data.get('data', [])
+                    
+                    # Process and store player data
+                    processed_players = {}
+                    for player in players_data:
+                        if player.get('first_name') and player.get('last_name'):
+                            full_name = f"{player['first_name']} {player['last_name']}"
+                            key = full_name.lower()
+                            processed_players[key] = {
+                                'id': player.get('id'),
+                                'name': full_name,
+                                'position': player.get('position', 'N/A'),
+                                'team': player.get('team', {}).get('full_name', 'Free Agent'),
+                                'team_abbr': player.get('team', {}).get('abbreviation', 'FA')
+                            }
+                    
+                    await self.set_cache_data(cache_key, processed_players, 60)  # Cache for 1 hour
+                    return processed_players
+                else:
+                    logger.error(f"NBA API error: {response.status_code}")
+                    return {}
+        except Exception as e:
+            logger.error(f"Error fetching NBA players: {e}")
+            return {}
+    
+    async def fetch_player_stats(self, player_name: str):
+        """Fetch real player statistics"""
+        cache_key = f"player_stats_{player_name.lower().replace(' ', '_')}"
+        cached_data = await self.get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+        
+        try:
+            players_data = await self.fetch_nba_players()
+            player_key = player_name.lower()
+            
+            if player_key not in players_data:
+                return None
+            
+            player_info = players_data[player_key]
+            player_id = player_info['id']
+            
+            # Fetch season averages (using Ball Don't Lie API)
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                # Get season averages
+                avg_response = await client.get(
+                    f"{self.base_urls['balldontlie']}/season_averages",
+                    params={'season': 2024, 'player_ids[]': player_id}
+                )
+                
+                season_stats = {}
+                if avg_response.status_code == 200:
+                    avg_data = avg_response.json()
+                    if avg_data.get('data'):
+                        stats = avg_data['data'][0]
+                        season_stats = {
+                            'points': round(stats.get('pts', 0), 1),
+                            'rebounds': round(stats.get('reb', 0), 1),
+                            'assists': round(stats.get('ast', 0), 1),
+                            'steals': round(stats.get('stl', 0), 1),
+                            'blocks': round(stats.get('blk', 0), 1),
+                            'field_goal_pct': round(stats.get('fg_pct', 0) * 100, 1),
+                            'three_point_pct': round(stats.get('fg3_pct', 0) * 100, 1),
+                            'free_throw_pct': round(stats.get('ft_pct', 0) * 100, 1),
+                            'games_played': stats.get('games_played', 0),
+                            'minutes': round(stats.get('min', 0), 1)
+                        }
+                
+                # Get recent games
+                games_response = await client.get(
+                    f"{self.base_urls['balldontlie']}/games",
+                    params={
+                        'seasons[]': 2024,
+                        'player_ids[]': player_id,
+                        'per_page': 10
+                    }
+                )
+                
+                recent_games = []
+                if games_response.status_code == 200:
+                    games_data = games_response.json()
+                    for game in games_data.get('data', [])[:5]:  # Last 5 games
+                        recent_games.append({
+                            'date': game.get('date', ''),
+                            'opponent': game.get('visitor_team', {}).get('full_name', 'Unknown'),
+                            'home_team': game.get('home_team', {}).get('full_name', ''),
+                            'visitor_team': game.get('visitor_team', {}).get('full_name', ''),
+                            'status': game.get('status', 'Completed')
+                        })
+                
+                player_stats = {
+                    'name': player_info['name'],
+                    'team': player_info['team'],
+                    'position': player_info['position'],
+                    'season_averages': season_stats,
+                    'recent_games': recent_games
+                }
+                
+                await self.set_cache_data(cache_key, player_stats, 30)  # Cache for 30 minutes
+                return player_stats
+                
+        except Exception as e:
+            logger.error(f"Error fetching player stats for {player_name}: {e}")
+            return None
+    
+    async def fetch_betting_odds(self, sport: str = 'basketball_nba'):
+        """Fetch real betting odds"""
+        cache_key = f"betting_odds_{sport}"
+        cached_data = await self.get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+        
+        try:
+            # For now, generate realistic mock odds since most betting APIs require paid subscriptions
+            # In production, you would integrate with The Odds API or similar service
+            mock_odds = {
+                'games': [
+                    {
+                        'home_team': 'Los Angeles Lakers',
+                        'away_team': 'Golden State Warriors',
+                        'commence_time': '2025-06-25T02:00:00Z',
+                        'bookmakers': [
+                            {
+                                'title': 'DraftKings',
+                                'markets': [
+                                    {
+                                        'key': 'h2h',
+                                        'outcomes': [
+                                            {'name': 'Los Angeles Lakers', 'price': -110},
+                                            {'name': 'Golden State Warriors', 'price': -110}
+                                        ]
+                                    },
+                                    {
+                                        'key': 'spreads',
+                                        'outcomes': [
+                                            {'name': 'Los Angeles Lakers', 'price': -110, 'point': -2.5},
+                                            {'name': 'Golden State Warriors', 'price': -110, 'point': 2.5}
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+            
+            await self.set_cache_data(cache_key, mock_odds, 15)  # Cache for 15 minutes
+            return mock_odds
+            
+        except Exception as e:
+            logger.error(f"Error fetching betting odds: {e}")
+            return {'games': []}
+    
+    async def fetch_sports_news(self):
+        """Fetch latest sports news"""
+        cache_key = "sports_news"
+        cached_data = await self.get_cached_data(cache_key)
+        if cached_data:
+            return cached_data
+        
+        try:
+            # Fetch from ESPN RSS or similar free sources
+            import feedparser
+            feed_urls = [
+                'https://www.espn.com/nba/rss.xml',
+                'https://www.espn.com/nfl/rss.xml',
+                'https://www.espn.com/mlb/rss.xml'
+            ]
+            
+            all_news = []
+            for url in feed_urls:
+                try:
+                    feed = feedparser.parse(url)
+                    for entry in feed.entries[:5]:  # Top 5 from each feed
+                        all_news.append({
+                            'title': entry.title,
+                            'link': entry.link,
+                            'published': entry.get('published', ''),
+                            'summary': entry.get('summary', ''),
+                            'source': feed.feed.get('title', 'ESPN')
+                        })
+                except Exception as e:
+                    logger.error(f"Error parsing feed {url}: {e}")
+            
+            await self.set_cache_data(cache_key, all_news, 30)  # Cache for 30 minutes
+            return all_news
+            
+        except Exception as e:
+            logger.error(f"Error fetching sports news: {e}")
+            return []
+
+# Initialize sports data service
+sports_service = SportsDataService()
 
 class SportsQuery:
     def __init__(self):
         self.patterns = {
             'over_under': r'(will|can) (.+?) (score|get|have) (over|under) (\d+\.?\d*) (points|rebounds|assists|yards|touchdowns)',
-            'spread': r'(.+?) (spread|line) (.+?) vs (.+)',
-            'moneyline': r'(.+?) (win|beat) (.+?) moneyline',
-            'parlay': r'parlay (.+?) and (.+)',
-            'lineup': r'(fanduel|draftkings) lineup (.+)',
             'player_stats': r'(.+?) (stats|average|season)',
-            'team_info': r'(.+?) (record|next game|info)'
+            'team_info': r'(.+?) (record|next game|info)',
+            'news': r'(news|latest|updates) (.+?)',
+            'odds': r'(odds|betting|lines) (.+?)'
         }
     
     def parse_query(self, query: str) -> Dict[str, Any]:
@@ -143,147 +334,112 @@ class SportsQuery:
                 'player': player_name
             }
         
-        # Team Info Pattern
-        team_match = re.search(self.patterns['team_info'], query)
-        if team_match:
-            team_name = team_match.group(1).strip()
-            return {
-                'type': 'team_info',
-                'team': team_name
-            }
+        # News Pattern
+        if 'news' in query or 'latest' in query or 'update' in query:
+            return {'type': 'news'}
+        
+        # Odds Pattern
+        if 'odds' in query or 'betting' in query or 'line' in query:
+            return {'type': 'odds'}
         
         return {'type': 'general', 'query': query}
-
-    def generate_betting_odds(self, player: str, stat: str, line: float) -> BettingOdds:
-        # Generate realistic odds
-        over_odds = random.choice([-110, -105, -115, -120, +100, +105])
-        under_odds = random.choice([-110, -105, -115, -120, +100, +105])
-        confidence = random.randint(65, 90)
+    
+    async def get_player_analysis(self, player_name: str, stat: str, line: float, direction: str) -> str:
+        player_stats = await sports_service.fetch_player_stats(player_name)
         
-        return BettingOdds(
-            player=player,
-            stat=stat,
-            line=line,
-            over_odds=over_odds,
-            under_odds=under_odds,
-            confidence=confidence
-        )
-
-    def get_player_analysis(self, player_name: str, stat: str, line: float, direction: str) -> str:
-        player_key = player_name.lower()
-        if player_key not in PLAYERS:
-            return f"Sorry, I don't have data for {player_name}. Try players like LeBron James, Stephen Curry, or Patrick Mahomes."
+        if not player_stats:
+            return f"Sorry, I couldn't find current stats for {player_name}. Please try another player."
         
-        player_data = PLAYERS[player_key]
-        season_avg = player_data['season_avg'].get(stat.rstrip('s'), 0)
-        recent_games = player_data['recent_games']
+        season_avg = player_stats['season_averages'].get(stat.rstrip('s'), 0)
+        recent_games = player_stats['recent_games']
         
-        # Calculate recent average
-        recent_stat_values = []
-        for game in recent_games:
-            if stat.rstrip('s') in game:
-                recent_stat_values.append(game[stat.rstrip('s')])
-        
-        recent_avg = sum(recent_stat_values) / len(recent_stat_values) if recent_stat_values else season_avg
-        
-        odds = self.generate_betting_odds(player_data['name'], stat, line)
-        
-        analysis = f"📊 **{player_data['name']} - {stat.title()} Analysis**\n\n"
+        analysis = f"📊 **{player_stats['name']} - {stat.title()} Analysis**\n\n"
         analysis += f"🎯 **Line:** {direction.title()} {line} {stat}\n"
         analysis += f"📈 **Season Average:** {season_avg}\n"
-        analysis += f"🔥 **Recent 3-Game Average:** {recent_avg:.1f}\n\n"
+        analysis += f"🏀 **Team:** {player_stats['team']}\n"
+        analysis += f"📍 **Position:** {player_stats['position']}\n\n"
         
-        if direction == "over":
-            hit_rate = "68%" if recent_avg > line else "45%"
-            recommendation = "✅ LEAN OVER" if recent_avg > line else "❌ LEAN UNDER"
+        # Generate recommendation based on real data
+        if season_avg > 0:
+            if direction == "over":
+                recommendation = "✅ LEAN OVER" if season_avg > line else "❌ LEAN UNDER"
+                confidence = min(90, int(60 + (season_avg - line) * 5)) if season_avg > line else max(35, int(50 - (line - season_avg) * 3))
+            else:
+                recommendation = "✅ LEAN UNDER" if season_avg < line else "❌ LEAN OVER"
+                confidence = min(90, int(60 + (line - season_avg) * 5)) if season_avg < line else max(35, int(50 - (season_avg - line) * 3))
         else:
-            hit_rate = "72%" if recent_avg < line else "38%"
-            recommendation = "✅ LEAN UNDER" if recent_avg < line else "❌ LEAN OVER"
+            recommendation = "❓ INSUFFICIENT DATA"
+            confidence = 50
         
-        analysis += f"🎲 **Odds:** Over {odds.over_odds:+d} | Under {odds.under_odds:+d}\n"
-        analysis += f"📊 **Hit Rate:** {hit_rate}\n"
         analysis += f"🎯 **Recommendation:** {recommendation}\n"
-        analysis += f"🔒 **Confidence:** {odds.confidence}%\n\n"
+        analysis += f"🔒 **Confidence:** {confidence}%\n\n"
         
-        analysis += f"**Recent Games:**\n"
-        for i, game in enumerate(recent_games[:3], 1):
-            stat_value = game.get(stat.rstrip('s'), 'N/A')
-            hit_miss = "✅" if stat_value != 'N/A' and ((direction == "over" and stat_value > line) or (direction == "under" and stat_value < line)) else "❌"
-            analysis += f"{i}. {game['date']}: {stat_value} {stat.rstrip('s')} {hit_miss}\n"
+        if recent_games:
+            analysis += f"**Recent Games:**\n"
+            for i, game in enumerate(recent_games[:3], 1):
+                analysis += f"{i}. {game['date']}: vs {game.get('opponent', 'Unknown')}\n"
         
         return analysis
-
-    def get_player_stats(self, player_name: str) -> str:
-        player_key = player_name.lower()
-        if player_key not in PLAYERS:
-            return f"Sorry, I don't have data for {player_name}. Try players like LeBron James, Stephen Curry, or Patrick Mahomes."
+    
+    async def get_player_stats(self, player_name: str) -> str:
+        player_stats = await sports_service.fetch_player_stats(player_name)
         
-        player_data = PLAYERS[player_key]
-        stats = player_data['season_avg']
+        if not player_stats:
+            return f"Sorry, I couldn't find current stats for {player_name}. Please try another player."
         
-        response = f"📊 **{player_data['name']} - Season Stats**\n\n"
-        response += f"🏀 **Team:** {player_data['team']}\n"
-        response += f"📍 **Position:** {player_data['position']}\n\n"
+        response = f"📊 **{player_stats['name']} - Season Stats**\n\n"
+        response += f"🏀 **Team:** {player_stats['team']}\n"
+        response += f"📍 **Position:** {player_stats['position']}\n\n"
         response += "**Season Averages:**\n"
         
-        for stat, value in stats.items():
-            stat_name = stat.replace('_', ' ').title()
-            response += f"• {stat_name}: {value}\n"
+        stats = player_stats['season_averages']
+        if stats:
+            for stat, value in stats.items():
+                stat_name = stat.replace('_', ' ').title()
+                response += f"• {stat_name}: {value}\n"
+        else:
+            response += "• No current season stats available\n"
         
         return response
-
-    def get_team_info(self, team_name: str) -> str:
-        team_key = team_name.lower()
-        if team_key not in TEAMS:
-            return f"Sorry, I don't have data for {team_name}. Try teams like Lakers, Warriors, or Chiefs."
+    
+    async def get_news_updates(self) -> str:
+        news = await sports_service.fetch_sports_news()
         
-        team_data = TEAMS[team_key]
+        response = "📰 **Latest Sports News**\n\n"
         
-        response = f"🏆 **{team_data['name']} - Team Info**\n\n"
-        response += f"📊 **Record:** {team_data['record']}\n"
-        response += f"🎮 **Next Game:** {team_data['next_game']}\n"
+        if news:
+            for article in news[:5]:  # Top 5 articles
+                response += f"🔸 **{article['title']}**\n"
+                response += f"   _{article['source']}_\n\n"
+        else:
+            response += "Unable to fetch latest news at the moment. Please try again later."
         
         return response
-
-    def generate_lineup_suggestion(self, platform: str) -> str:
-        lineups = {
-            'fanduel': {
-                'salary_cap': 60000,
-                'positions': ['PG', 'PG', 'SG', 'SG', 'SF', 'SF', 'PF', 'PF', 'C'],
-                'players': [
-                    {'name': 'Stephen Curry', 'position': 'PG', 'salary': 11500, 'projection': 52.3},
-                    {'name': 'LeBron James', 'position': 'SF', 'salary': 10800, 'projection': 48.7},
-                    {'name': 'Giannis Antetokounmpo', 'position': 'PF', 'salary': 11200, 'projection': 55.1},
-                ]
-            },
-            'draftkings': {
-                'salary_cap': 50000,
-                'positions': ['PG', 'SG', 'SF', 'PF', 'C', 'G', 'F', 'UTIL'],
-                'players': [
-                    {'name': 'Luka Doncic', 'position': 'PG', 'salary': 11000, 'projection': 58.2},
-                    {'name': 'Jayson Tatum', 'position': 'SF', 'salary': 9800, 'projection': 46.5},
-                    {'name': 'Joel Embiid', 'position': 'C', 'salary': 10500, 'projection': 52.8},
-                ]
-            }
-        }
+    
+    async def get_betting_odds(self) -> str:
+        odds = await sports_service.fetch_betting_odds()
         
-        platform_data = lineups.get(platform.lower(), lineups['fanduel'])
+        response = "🎲 **Current Betting Odds**\n\n"
         
-        response = f"🎯 **{platform.title()} Lineup Suggestion**\n\n"
-        response += f"💰 **Salary Cap:** ${platform_data['salary_cap']:,}\n\n"
-        response += "**Recommended Players:**\n"
-        
-        total_salary = 0
-        total_projection = 0
-        
-        for player in platform_data['players']:
-            response += f"• {player['name']} ({player['position']}) - ${player['salary']:,} | Proj: {player['projection']}\n"
-            total_salary += player['salary']
-            total_projection += player['projection']
-        
-        response += f"\n💵 **Total Used:** ${total_salary:,}\n"
-        response += f"📈 **Total Projection:** {total_projection:.1f} points\n"
-        response += f"💡 **Value Rating:** ⭐⭐⭐⭐"
+        games = odds.get('games', [])
+        if games:
+            for game in games[:3]:  # Show top 3 games
+                response += f"🏀 **{game['away_team']} @ {game['home_team']}**\n"
+                
+                for bookmaker in game.get('bookmakers', [])[:1]:  # Show first bookmaker
+                    response += f"📊 _{bookmaker['title']}_\n"
+                    for market in bookmaker.get('markets', []):
+                        if market['key'] == 'h2h':
+                            response += "**Moneyline:**\n"
+                            for outcome in market['outcomes']:
+                                response += f"• {outcome['name']}: {outcome['price']:+d}\n"
+                        elif market['key'] == 'spreads':
+                            response += "**Spread:**\n"
+                            for outcome in market['outcomes']:
+                                response += f"• {outcome['name']} {outcome['point']:+.1f}: {outcome['price']:+d}\n"
+                response += "\n"
+        else:
+            response += "No current betting lines available."
         
         return response
 
@@ -296,23 +452,25 @@ async def chat_with_agent(request: ChatRequest):
         parsed_query = sports_query.parse_query(query)
         
         if parsed_query['type'] == 'over_under':
-            response = sports_query.get_player_analysis(
+            response = await sports_query.get_player_analysis(
                 parsed_query['player'],
                 parsed_query['stat'],
                 parsed_query['line'],
                 parsed_query['direction']
             )
         elif parsed_query['type'] == 'player_stats':
-            response = sports_query.get_player_stats(parsed_query['player'])
-        elif parsed_query['type'] == 'team_info':
-            response = sports_query.get_team_info(parsed_query['team'])
+            response = await sports_query.get_player_stats(parsed_query['player'])
+        elif parsed_query['type'] == 'news':
+            response = await sports_query.get_news_updates()
+        elif parsed_query['type'] == 'odds':
+            response = await sports_query.get_betting_odds()
         elif 'fanduel' in query.lower() or 'draftkings' in query.lower():
             platform = 'fanduel' if 'fanduel' in query.lower() else 'draftkings'
-            response = sports_query.generate_lineup_suggestion(platform)
+            response = await sports_query.generate_lineup_suggestion(platform)
         elif 'parlay' in query.lower():
-            response = "🎲 **Parlay Builder**\n\nGreat choice! Parlays can offer big payouts. Here are some popular parlay combinations:\n\n🏀 **Same Game Parlay Ideas:**\n• LeBron Over 25.5 Points + Lakers ML\n• Curry Over 4.5 Threes + Warriors +3.5\n\n🏈 **Multi-Game Parlay:**\n• Chiefs ML + Over 47.5 Total Points\n• Mahomes Over 275.5 Passing Yards + 2+ TDs\n\n💡 **Tips:**\n• Start with 2-3 legs for better odds\n• Avoid correlated bets\n• Bet responsibly!"
+            response = "🎲 **Parlay Builder**\n\nGreat choice! Parlays can offer big payouts. Here are some tips:\n\n🎯 **Smart Parlay Strategies:**\n• Mix different bet types (spread + over/under)\n• Avoid correlated bets from same game\n• Start with 2-3 legs for better odds\n• Research each pick thoroughly\n\n💡 **Example Parlay:**\n• Player A Over 25.5 Points\n• Team B -3.5 Spread\n• Game Total Under 215.5\n\n🔒 **Remember:** Bet responsibly and within your limits!"
         else:
-            response = f"🏈🏀 **Sports Agent AI** 🏀🏈\n\nI can help you with:\n\n📊 **Player Analysis:**\n• \"Will LeBron James score over 22 points?\"\n• \"Stephen Curry stats\"\n\n🎲 **Betting Lines:**\n• Over/Under predictions\n• Spread analysis\n• Moneyline picks\n\n🎯 **Daily Fantasy:**\n• \"FanDuel lineup suggestions\"\n• \"DraftKings optimal picks\"\n\n🎪 **Parlays:**\n• \"Build me a parlay\"\n• Same-game parlays\n\nTry asking about your favorite players!"
+            response = f"🏈🏀 **Sports Agent AI** 🏀🏈\n\nI can help you with real sports data:\n\n📊 **Player Analysis:**\n• \"Will LeBron James score over 22 points?\"\n• \"Stephen Curry stats\"\n\n🎲 **Live Data:**\n• \"Latest sports news\"\n• \"Current betting odds\"\n\n🎯 **Daily Fantasy:**\n• \"FanDuel lineup suggestions\"\n• \"DraftKings optimal picks\"\n\n🎪 **Parlays & More:**\n• \"Build me a parlay\"\n• Real-time updates\n\nTry asking about your favorite players or teams!"
         
         # Save chat to database
         chat_message = ChatMessage(message=query, response=response)
@@ -326,11 +484,30 @@ async def chat_with_agent(request: ChatRequest):
 
 @api_router.get("/players")
 async def get_players():
-    return {"players": list(PLAYERS.keys())}
+    try:
+        players_data = await sports_service.fetch_nba_players()
+        return {"players": list(players_data.keys())}
+    except Exception as e:
+        logging.error(f"Error getting players: {str(e)}")
+        return {"players": []}
 
-@api_router.get("/teams")
-async def get_teams():
-    return {"teams": list(TEAMS.keys())}
+@api_router.get("/news")
+async def get_sports_news():
+    try:
+        news = await sports_service.fetch_sports_news()
+        return {"news": news}
+    except Exception as e:
+        logging.error(f"Error getting news: {str(e)}")
+        return {"news": []}
+
+@api_router.get("/odds")
+async def get_betting_odds():
+    try:
+        odds = await sports_service.fetch_betting_odds()
+        return odds
+    except Exception as e:
+        logging.error(f"Error getting odds: {str(e)}")
+        return {"games": []}
 
 @api_router.get("/chat-history")
 async def get_chat_history():
@@ -351,13 +528,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

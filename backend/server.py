@@ -1309,7 +1309,7 @@ class AdvancedRealDataQuery:
         if re.search(self.patterns['test_system'], query):
             return {'type': 'test_system', 'content': query}
         
-        # Esports Over/Under
+        # Enhanced Esports Over/Under with flexible format
         esports_match = re.search(self.patterns['esports_over_under'], query)
         if esports_match:
             player_name = esports_match.group(2).strip()
@@ -1318,6 +1318,28 @@ class AdvancedRealDataQuery:
             direction = esports_match.group(4)
             
             game = 'csgo' if any(word in query for word in ['csgo', 'counter', 'cs:go', 's1mple', 'zywoo', 'device']) else 'valorant'
+            
+            return {
+                'type': 'esports_over_under',
+                'player': player_name,
+                'stat': stat_type,
+                'line': line_value,
+                'direction': direction,
+                'game': game
+            }
+        
+        # Alternative esports format: "Will [player] [number] kills"
+        alt_esports = re.search(r'(will|can) (.+?) (\d+\.?\d*) (kills|headshots)', query)
+        if alt_esports:
+            player_name = alt_esports.group(2).strip()
+            line_value = float(alt_esports.group(3))
+            stat_type = alt_esports.group(4)
+            
+            # Determine over/under from context or default to over
+            direction = 'over' if 'over' in query else 'under' if 'under' in query else 'over'
+            
+            # Determine game
+            game = 'csgo' if any(word in query for word in ['csgo', 'counter', 'cs:go', 'map1', 'map2']) else 'valorant'
             
             return {
                 'type': 'esports_over_under',

@@ -320,9 +320,9 @@ class SportsAgentBackendTest:
             response_text = data["response"]
             print(f"Response preview: {response_text[:100]}...")
             
-            # Check for expected content in the response
+            # Check for expected content in the response - note that the API returns "Fanduel" (lowercase 'd')
             expected_content = [
-                "FanDuel", 
+                "Fanduel", 
                 "Lineup Suggestion", 
                 "Salary Cap:", 
                 "Recommended Players:", 

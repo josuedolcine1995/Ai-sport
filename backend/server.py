@@ -1267,7 +1267,12 @@ class AdvancedRealDataQuery:
             'valorant_query': r'(valorant|val) (.+)',
             'nba_query': r'(nba|basketball) (.+)',
             'system_status': r'(system|status|health|accuracy)',
-            'test_system': r'(test|check|verify) (.+)'
+            'test_system': r'(test|check|verify) (.+)',
+            # NEW FLEXIBLE FORMATS
+            'flexible_kills_map': r'(will|can) (.+?) (\d+\.?\d*) kills.*(map\s*\d+|map1|map2)',
+            'flexible_kills_general': r'(will|can) (.+?) (\d+\.?\d*) kills',
+            'map_specific': r'(.+?) (\d+\.?\d*) kills.*(map\s*\d+|map1|map2)',
+            'simple_kills': r'(.+?) (\d+\.?\d*) kills'
         }
     
     async def process_with_real_data(self, query: str) -> Dict[str, Any]:

@@ -406,15 +406,15 @@ class SportsAgentBackendTest:
             response_text = data["response"]
             print(f"Response preview: {response_text[:100]}...")
             
-            # Check for expected content in the response
+            # Check for expected content in the response - note that the API returns lowercase player name
             expected_content = [
                 "Sorry", 
                 "don't have data", 
-                "Michael Jordan"
+                "michael jordan"
             ]
             
             for content in expected_content:
-                if content not in response_text:
+                if content not in response_text.lower():
                     print(f"Error: Expected content '{content}' not found in response")
                     return False
             

@@ -152,15 +152,18 @@ backend:
 
   - task: "Chat History & Database Integration"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "Added MongoDB integration to store chat history with proper models and endpoints"
+        - working: true
+          agent: "testing"
+          comment: "Tested chat history and database integration. The API successfully stores chat messages in MongoDB and retrieves them through the chat-history endpoint. The database connection is working properly, and the chat history is being stored with the correct structure."
 
 frontend:
   - task: "Sports Agent Chat Interface"

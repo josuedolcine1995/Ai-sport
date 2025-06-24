@@ -468,9 +468,329 @@ class SportsAgentBackendTest:
             print(f"Error in chat endpoint general query test: {e}")
             return False
 
+    def test_csgo_matches_endpoint(self):
+        """Test the CS:GO matches endpoint"""
+        try:
+            response = requests.get(f"{self.api_url}/esports/csgo/matches")
+            print(f"Response status code: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"Error: Unexpected status code {response.status_code}")
+                return False
+            
+            data = response.json()
+            print(f"Response structure: {list(data.keys())}")
+            
+            if not isinstance(data, dict) or "matches" not in data:
+                print("Error: Response does not contain 'matches' key")
+                return False
+            
+            matches = data["matches"]
+            if not isinstance(matches, list) or len(matches) == 0:
+                print("Error: 'matches' is not a list or is empty")
+                return False
+            
+            # Check if matches have expected structure
+            for match in matches[:2]:
+                if not all(key in match for key in ["id", "name", "teams", "status"]):
+                    print(f"Error: Match missing required fields: {match}")
+                    return False
+                
+                # Check if teams data is present
+                teams = match.get("teams", [])
+                if not isinstance(teams, list) or len(teams) < 2:
+                    print(f"Error: Match has invalid teams data: {teams}")
+                    return False
+                
+                # Check if players data is present
+                players = match.get("players", [])
+                if not isinstance(players, list):
+                    print(f"Error: Match has invalid players data: {players}")
+                    return False
+            
+            print(f"Found {len(matches)} CS:GO matches with valid structure")
+            return True
+        except Exception as e:
+            print(f"Error in CS:GO matches endpoint test: {e}")
+            return False
+    
+    def test_valorant_matches_endpoint(self):
+        """Test the Valorant matches endpoint"""
+        try:
+            response = requests.get(f"{self.api_url}/esports/valorant/matches")
+            print(f"Response status code: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"Error: Unexpected status code {response.status_code}")
+                return False
+            
+            data = response.json()
+            print(f"Response structure: {list(data.keys())}")
+            
+            if not isinstance(data, dict) or "matches" not in data:
+                print("Error: Response does not contain 'matches' key")
+                return False
+            
+            matches = data["matches"]
+            if not isinstance(matches, list) or len(matches) == 0:
+                print("Error: 'matches' is not a list or is empty")
+                return False
+            
+            # Check if matches have expected structure
+            for match in matches[:2]:
+                if not all(key in match for key in ["id", "name", "teams", "status"]):
+                    print(f"Error: Match missing required fields: {match}")
+                    return False
+                
+                # Check if teams data is present
+                teams = match.get("teams", [])
+                if not isinstance(teams, list) or len(teams) < 2:
+                    print(f"Error: Match has invalid teams data: {teams}")
+                    return False
+                
+                # Check if players data is present
+                players = match.get("players", [])
+                if not isinstance(players, list):
+                    print(f"Error: Match has invalid players data: {players}")
+                    return False
+                
+                # Check for Valorant-specific fields
+                for player in players[:2]:
+                    if "agent" not in player:
+                        print(f"Error: Valorant player missing 'agent' field: {player}")
+                        return False
+            
+            print(f"Found {len(matches)} Valorant matches with valid structure")
+            return True
+        except Exception as e:
+            print(f"Error in Valorant matches endpoint test: {e}")
+            return False
+    
+    def test_model_accuracy_endpoint(self):
+        """Test the ML model accuracy endpoint"""
+        try:
+            response = requests.get(f"{self.api_url}/esports/accuracy")
+            print(f"Response status code: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"Error: Unexpected status code {response.status_code}")
+                return False
+            
+            data = response.json()
+            print(f"Response data: {data}")
+            
+            # Check if response has expected structure
+            if not isinstance(data, dict) or "csgo" not in data or "valorant" not in data:
+                print("Error: Response missing required game fields")
+                return False
+            
+            # Check if accuracy data is present for each game
+            for game in ["csgo", "valorant"]:
+                game_data = data[game]
+                if not isinstance(game_data, dict) or "target" not in game_data or "current" not in game_data:
+                    print(f"Error: {game} data missing required accuracy fields")
+                    return False
+                
+                # Check if accuracy values are valid
+                target = game_data["target"]
+                current = game_data["current"]
+                if not isinstance(target, (int, float)) or not isinstance(current, (int, float)):
+                    print(f"Error: {game} accuracy values are not numeric")
+                    return False
+                
+                # Check if accuracy meets the 90%+ requirement
+                if current < 0.9:
+                    print(f"Error: {game} current accuracy {current} is below 90% target")
+                    return False
+                
+                print(f"{game.upper()} model accuracy: {current*100:.1f}% (target: {target*100:.1f}%)")
+            
+            return True
+        except Exception as e:
+            print(f"Error in model accuracy endpoint test: {e}")
+            return False
+    
+    def test_chat_endpoint_csgo_query(self):
+        """Test the chat endpoint with a CS:GO query"""
+        try:
+            message = "CS:GO matches today"
+            response = requests.post(
+                f"{self.api_url}/chat",
+                json={"message": message}
+            )
+            print(f"Response status code: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"Error: Unexpected status code {response.status_code}")
+                return False
+            
+            data = response.json()
+            print(f"Response structure: {list(data.keys())}")
+            
+            if not isinstance(data, dict) or "response" not in data:
+                print("Error: Response does not contain 'response' key")
+                return False
+            
+            response_text = data["response"]
+            print(f"Response preview: {response_text[:200]}...")
+            
+            # Check for expected content in the response
+            expected_content = [
+                "CS:GO Matches",
+                "Prediction",
+                "Confidence",
+                "Model Performance",
+                "Accuracy"
+            ]
+            
+            for content in expected_content:
+                if content not in response_text:
+                    print(f"Error: Expected content '{content}' not found in response")
+                    return False
+            
+            return True
+        except Exception as e:
+            print(f"Error in chat endpoint CS:GO query test: {e}")
+            return False
+    
+    def test_chat_endpoint_valorant_query(self):
+        """Test the chat endpoint with a Valorant query"""
+        try:
+            message = "Valorant predictions"
+            response = requests.post(
+                f"{self.api_url}/chat",
+                json={"message": message}
+            )
+            print(f"Response status code: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"Error: Unexpected status code {response.status_code}")
+                return False
+            
+            data = response.json()
+            print(f"Response structure: {list(data.keys())}")
+            
+            if not isinstance(data, dict) or "response" not in data:
+                print("Error: Response does not contain 'response' key")
+                return False
+            
+            response_text = data["response"]
+            print(f"Response preview: {response_text[:200]}...")
+            
+            # Check for expected content in the response
+            expected_content = [
+                "Valorant Matches",
+                "Prediction",
+                "Confidence",
+                "Model Performance",
+                "Accuracy"
+            ]
+            
+            for content in expected_content:
+                if content not in response_text:
+                    print(f"Error: Expected content '{content}' not found in response")
+                    return False
+            
+            return True
+        except Exception as e:
+            print(f"Error in chat endpoint Valorant query test: {e}")
+            return False
+    
+    def test_chat_endpoint_csgo_player_kills(self):
+        """Test the chat endpoint with a CS:GO player kills query"""
+        try:
+            message = "Will s1mple get over 20 kills?"
+            response = requests.post(
+                f"{self.api_url}/chat",
+                json={"message": message}
+            )
+            print(f"Response status code: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"Error: Unexpected status code {response.status_code}")
+                return False
+            
+            data = response.json()
+            print(f"Response structure: {list(data.keys())}")
+            
+            if not isinstance(data, dict) or "response" not in data:
+                print("Error: Response does not contain 'response' key")
+                return False
+            
+            response_text = data["response"]
+            print(f"Response preview: {response_text[:200]}...")
+            
+            # Check for expected content in the response
+            expected_content = [
+                "s1mple",
+                "CS:GO",
+                "Analysis",
+                "Line:",
+                "AI Prediction:",
+                "Recommendation:",
+                "Confidence:",
+                "Model Accuracy:"
+            ]
+            
+            for content in expected_content:
+                if content not in response_text:
+                    print(f"Error: Expected content '{content}' not found in response")
+                    return False
+            
+            return True
+        except Exception as e:
+            print(f"Error in chat endpoint CS:GO player kills test: {e}")
+            return False
+    
+    def test_chat_endpoint_valorant_player_kills(self):
+        """Test the chat endpoint with a Valorant player kills query"""
+        try:
+            message = "Will TenZ get over 15 kills?"
+            response = requests.post(
+                f"{self.api_url}/chat",
+                json={"message": message}
+            )
+            print(f"Response status code: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"Error: Unexpected status code {response.status_code}")
+                return False
+            
+            data = response.json()
+            print(f"Response structure: {list(data.keys())}")
+            
+            if not isinstance(data, dict) or "response" not in data:
+                print("Error: Response does not contain 'response' key")
+                return False
+            
+            response_text = data["response"]
+            print(f"Response preview: {response_text[:200]}...")
+            
+            # Check for expected content in the response
+            expected_content = [
+                "TenZ",
+                "VALORANT",
+                "Analysis",
+                "Line:",
+                "AI Prediction:",
+                "Recommendation:",
+                "Confidence:",
+                "Model Accuracy:"
+            ]
+            
+            for content in expected_content:
+                if content not in response_text:
+                    print(f"Error: Expected content '{content}' not found in response")
+                    return False
+            
+            return True
+        except Exception as e:
+            print(f"Error in chat endpoint Valorant player kills test: {e}")
+            return False
+
     def run_all_tests(self):
         """Run all tests and print a summary"""
-        print(f"\n{'='*80}\nRunning Sports Agent Backend Tests with REAL Data Integration\n{'='*80}")
+        print(f"\n{'='*80}\nRunning Sports Agent Backend Tests with REAL Data Integration and Esports ML\n{'='*80}")
         print(f"\nNOTE: Ball Don't Lie API now requires an API key for authentication.\nTests are adjusted to verify proper error handling.\n")
         
         # Run all tests
@@ -485,6 +805,15 @@ class SportsAgentBackendTest:
         self.run_test("MongoDB Caching", self.test_mongodb_caching)
         self.run_test("Chat Endpoint - Unknown Player", self.test_chat_endpoint_unknown_player)
         self.run_test("Chat Endpoint - General Query", self.test_chat_endpoint_general_query)
+        
+        # Esports-specific tests
+        self.run_test("CS:GO Matches Endpoint", self.test_csgo_matches_endpoint)
+        self.run_test("Valorant Matches Endpoint", self.test_valorant_matches_endpoint)
+        self.run_test("ML Model Accuracy Endpoint", self.test_model_accuracy_endpoint)
+        self.run_test("Chat Endpoint - CS:GO Query", self.test_chat_endpoint_csgo_query)
+        self.run_test("Chat Endpoint - Valorant Query", self.test_chat_endpoint_valorant_query)
+        self.run_test("Chat Endpoint - CS:GO Player Kills", self.test_chat_endpoint_csgo_player_kills)
+        self.run_test("Chat Endpoint - Valorant Player Kills", self.test_chat_endpoint_valorant_player_kills)
         
         # Print summary
         print(f"\n{'='*80}\nTest Summary\n{'='*80}")

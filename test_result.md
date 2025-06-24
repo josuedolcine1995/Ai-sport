@@ -122,15 +122,18 @@ backend:
 
   - task: "Advanced ML Ensemble System"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/backend/server.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "critical"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "BREAKTHROUGH: Implemented 90%+ accuracy ML system with ensemble models (Random Forest + Gradient Boosting + Neural Networks). Added cross-validation, automatic retraining, accuracy monitoring, and bulletproof prediction pipeline. Models achieve: CS:GO 92.5%, Valorant 92%, NBA 91.5%, Match Outcomes 93%."
+        - working: false
+          agent: "testing"
+          comment: "Unable to test the ML Ensemble System due to backend startup issues. The backend is failing to start due to missing dependencies. The ML models appear to be training based on the logs, but the API endpoints are not accessible for testing."
 
   - task: "Advanced Esports ML Integration"
     implemented: true

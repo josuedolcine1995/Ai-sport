@@ -85,11 +85,11 @@ function App() {
 
   const quickActions = [
     "Will s1mple get over 20 kills?",
+    "Will Majesticzz 29.5 kills on map1+2",
+    "Will TenZ 15 kills map 1",
     "Will LeBron score over 25 points?",
     "CS:GO match predictions today",
-    "Valorant pro player analysis",
-    "NBA over/under analysis",
-    "Bulletproof prediction accuracy"
+    "System accuracy status"
   ];
 
   return (

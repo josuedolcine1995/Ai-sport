@@ -104,21 +104,36 @@ class MatchPrediction(BaseModel):
 # Advanced Web Scraping Service
 class AdvancedWebScrapingService:
     def __init__(self):
-        self.ua = UserAgent()
-        self.scraper = cloudscraper.create_scraper()
+        # Initialize with fallbacks for missing modules
+        if UserAgent is not None:
+            self.ua = UserAgent()
+            user_agent = self.ua.random
+        else:
+            self.ua = None
+            user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        
+        if cloudscraper is not None:
+            self.scraper = cloudscraper.create_scraper()
+        else:
+            self.scraper = None
+        
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': self.ua.random,
+            'User-Agent': user_agent,
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
             'Accept-Language': 'en-US,en;q=0.5',
             'Accept-Encoding': 'gzip, deflate',
             'Connection': 'keep-alive',
         })
-        self.chrome_options = Options()
-        self.chrome_options.add_argument('--headless')
-        self.chrome_options.add_argument('--no-sandbox')
-        self.chrome_options.add_argument('--disable-dev-shm-usage')
-        self.chrome_options.add_argument(f'--user-agent={self.ua.random}')
+        
+        if webdriver is not None:
+            self.chrome_options = Options()
+            self.chrome_options.add_argument('--headless')
+            self.chrome_options.add_argument('--no-sandbox')
+            self.chrome_options.add_argument('--disable-dev-shm-usage')
+            self.chrome_options.add_argument(f'--user-agent={user_agent}')
+        else:
+            self.chrome_options = None
         
         # Data sources
         self.data_sources = {

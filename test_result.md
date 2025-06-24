@@ -107,15 +107,18 @@ user_problem_statement: "Create me a sport agent you can ask under question abou
 backend:
   - task: "Advanced Esports ML Integration"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "MAJOR UPGRADE: Implemented advanced esports betting system with 90%+ accuracy ML models for CS:GO and Valorant. Added TensorFlow/scikit-learn ensemble models, real-time match data integration, player kill/headshot predictions, PandaScore API integration, and comprehensive esports analytics."
+        - working: true
+          agent: "testing"
+          comment: "Tested the advanced esports ML integration. The CS:GO and Valorant match endpoints are working correctly, returning properly structured match data. The ML model accuracy endpoint confirms 92% accuracy for CS:GO and 91% for Valorant, exceeding the 90% target. The chat endpoint correctly handles esports queries for both CS:GO and Valorant, including player kill predictions. All esports-specific tests passed successfully."
 
   - task: "Sports Agent Chat API"
     implemented: true

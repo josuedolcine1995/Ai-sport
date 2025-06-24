@@ -62,7 +62,8 @@ class SportsAgentBackendTest:
     def test_health_check(self):
         """Test the health check endpoint"""
         try:
-            response = requests.get(f"{self.api_url}/")
+            # The API doesn't have a specific health check endpoint, so we'll use the players endpoint
+            response = requests.get(f"{self.api_url}/players")
             print(f"Response status code: {response.status_code}")
             return response.status_code == 200
         except Exception as e:

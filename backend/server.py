@@ -156,7 +156,12 @@ class AdvancedWebScrapingService:
             # Search for player on HLTV
             search_url = f"{self.data_sources['hltv']}/search?term={player_name}"
             
-            response = self.scraper.get(search_url, timeout=10)
+            # Use scraper if available, otherwise use regular session
+            if self.scraper:
+                response = self.scraper.get(search_url, timeout=10)
+            else:
+                response = self.session.get(search_url, timeout=10)
+                
             soup = BeautifulSoup(response.content, 'html.parser')
             
             # Extract player stats (mock realistic data for now)

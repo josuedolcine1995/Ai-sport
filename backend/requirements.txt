@@ -19,3 +19,14 @@ torch
 joblib
 redis
 python-dateutil
+selenium
+lxml
+playwright
+fake-useragent
+undetected-chromedriver
+cloudscraper
+aiohttp
+websockets
+schedule
+python-telegram-bot
+tweepy

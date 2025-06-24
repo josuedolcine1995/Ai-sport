@@ -1579,9 +1579,15 @@ class AdvancedRealDataQuery:
                 "real_data_sources": ["System Processing"]
             }
     
-    def generate_enhanced_prediction(self, player_data: Dict, game: str, stat_type: str, line: float) -> float:
+    def generate_enhanced_prediction(self, player_data: Dict, game: str, stat_type: str, line: float, query_context: Dict = None) -> float:
         """Generate enhanced prediction while ML models train"""
         try:
+            if query_context is None:
+                query_context = {}
+            
+            original_query = query_context.get('original_query', '')
+            map_context = query_context.get('map_context', '')
+            
             if game == 'csgo':
                 base_performance = player_data.get('rating_2_0', 1.0)
                 kills_estimate = 15 + (base_performance - 1.0) * 12
@@ -1592,7 +1598,19 @@ class AdvancedRealDataQuery:
                 elif base_performance < 0.9:  # Lower tier
                     kills_estimate -= 2
                 
-                return max(10, min(35, kills_estimate))
+                # Map-specific adjustments
+                if 'map1+2' in original_query or '+' in original_query:
+                    # Multi-map prediction - typically higher total
+                    kills_estimate *= 1.8  # Across 2 maps
+                    kills_estimate += random.uniform(-2, 4)  # Variance
+                elif 'map 1' in original_query or 'map1' in original_query:
+                    # Single map - slightly higher for first map (usually longer)
+                    kills_estimate *= 1.1
+                elif 'map 2' in original_query or 'map2' in original_query:
+                    # Single map - standard performance
+                    kills_estimate *= 1.0
+                
+                return max(5, min(50, kills_estimate))  # Expanded range for multi-map
                 
             else:  # valorant
                 base_performance = player_data.get('rating', 1.0)
@@ -1604,12 +1622,24 @@ class AdvancedRealDataQuery:
                 elif base_performance < 0.85:
                     kills_estimate -= 2
                 
-                return max(8, min(30, kills_estimate))
+                # Map-specific adjustments for Valorant
+                if 'map1+2' in original_query or '+' in original_query:
+                    kills_estimate *= 1.9  # Valorant maps can be longer
+                    kills_estimate += random.uniform(-1, 3)
+                elif 'map 1' in original_query or 'map1' in original_query:
+                    kills_estimate *= 1.05
+                elif 'map 2' in original_query or 'map2' in original_query:
+                    kills_estimate *= 0.95  # Second map might be shorter
+                
+                return max(3, min(45, kills_estimate))  # Expanded range for multi-map
                 
         except Exception as e:
             logger.error(f"Error generating prediction: {e}")
-            # Return line-based estimate
-            return line + random.uniform(-2, 3)
+            # Return line-based estimate with map context
+            if 'map1+2' in str(query_context) or '+' in str(query_context):
+                return line + random.uniform(-3, 5)  # Multi-map variance
+            else:
+                return line + random.uniform(-2, 3)  # Single map variance
     
     async def get_real_nba_prediction(self, parsed_query: Dict) -> Dict[str, Any]:
         """Get NBA prediction using ONLY real data"""

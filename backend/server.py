@@ -1527,10 +1527,29 @@ class AdvancedRealDataQuery:
             response += f"• Last Updated: {player_data.get('last_updated', 'Recent')}\n\n"
             
             response += f"**🎮 {game.upper()} Context:**\n"
-            if 'map1' in parsed_query.get('original_query', '') or 'map2' in parsed_query.get('original_query', ''):
-                response += f"• Multi-Map Analysis: Considering map performance\n"
-            response += f"• Tournament Level: Professional competition\n"
-            response += f"• Prediction Type: {stat_type.title()} over/under\n\n"
+            
+            # Enhanced map context handling
+            map_context = parsed_query.get('map_context', '')
+            original_query = parsed_query.get('original_query', '')
+            
+            if map_context or 'map1' in original_query or 'map2' in original_query or '+' in original_query:
+                if 'map1+2' in original_query or '+' in original_query:
+                    response += f"• **Multi-Map Analysis**: Combined performance across 2 maps\n"
+                    response += f"• **Total Kills Expected**: {base_prediction:.1f} across both maps\n"
+                elif 'map 1' in original_query or 'map1' in original_query:
+                    response += f"• **Single Map Analysis**: Map 1 performance only\n"
+                    response += f"• **Map-Specific Prediction**: {base_prediction:.1f} kills on this map\n"
+                elif 'map 2' in original_query or 'map2' in original_query:
+                    response += f"• **Single Map Analysis**: Map 2 performance only\n"
+                    response += f"• **Map-Specific Prediction**: {base_prediction:.1f} kills on this map\n"
+                else:
+                    response += f"• **Map Context**: {map_context}\n"
+            else:
+                response += f"• **Standard Analysis**: Full match performance\n"
+            
+            response += f"• **Tournament Level**: Professional competition\n"
+            response += f"• **Prediction Type**: {stat_type.title()} {direction}/under\n"
+            response += f"• **Query Format**: Flexible natural language ✅\n\n"
             
             response += f"**🛡️ System Status:**\n"
             response += f"• Real data integration: ✅ Active\n"

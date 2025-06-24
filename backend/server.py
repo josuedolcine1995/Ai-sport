@@ -1306,6 +1306,7 @@ class AdvancedRealDataQuery:
     def parse_query(self, query: str) -> Dict[str, Any]:
         """Parse query with advanced pattern matching"""
         query = query.lower().strip()
+        original_query = query  # Keep original for context
         
         # System status queries
         if re.search(self.patterns['system_status'], query):
@@ -1331,7 +1332,97 @@ class AdvancedRealDataQuery:
                 'stat': stat_type,
                 'line': line_value,
                 'direction': direction,
-                'game': game
+                'game': game,
+                'original_query': original_query
+            }
+        
+        # NEW: Flexible format "Will Majesticzz 29.5 kills on map1+2"
+        flexible_map_match = re.search(self.patterns['flexible_kills_map'], query)
+        if flexible_map_match:
+            player_name = flexible_map_match.group(2).strip()
+            line_value = float(flexible_map_match.group(3))
+            map_context = flexible_map_match.group(4) if len(flexible_map_match.groups()) >= 4 else ''
+            
+            # Default to "over" unless "under" is specified
+            direction = 'under' if 'under' in query else 'over'
+            
+            # Determine game from context
+            game = 'csgo' if any(word in query for word in ['csgo', 'counter', 'cs:go', 'map1', 'map2', '+']) else 'valorant'
+            
+            return {
+                'type': 'esports_over_under',
+                'player': player_name,
+                'stat': 'kills',
+                'line': line_value,
+                'direction': direction,
+                'game': game,
+                'map_context': map_context,
+                'original_query': original_query
+            }
+        
+        # NEW: Flexible format "Will Majesticzz 15 kills map 1"
+        map_specific_match = re.search(self.patterns['map_specific'], query)
+        if map_specific_match:
+            player_name = map_specific_match.group(1).strip()
+            line_value = float(map_specific_match.group(2))
+            map_context = map_specific_match.group(3) if len(map_specific_match.groups()) >= 3 else ''
+            
+            # Remove "will" or "can" from player name if present
+            player_name = re.sub(r'^(will|can)\s+', '', player_name).strip()
+            
+            direction = 'under' if 'under' in query else 'over'
+            game = 'csgo' if any(word in query for word in ['csgo', 'counter', 'cs:go', 'map']) else 'valorant'
+            
+            return {
+                'type': 'esports_over_under',
+                'player': player_name,
+                'stat': 'kills',
+                'line': line_value,
+                'direction': direction,
+                'game': game,
+                'map_context': map_context,
+                'original_query': original_query
+            }
+        
+        # NEW: General flexible format "Will Majesticzz 29.5 kills"
+        flexible_general_match = re.search(self.patterns['flexible_kills_general'], query)
+        if flexible_general_match:
+            player_name = flexible_general_match.group(2).strip()
+            line_value = float(flexible_general_match.group(3))
+            
+            direction = 'under' if 'under' in query else 'over'
+            game = 'csgo' if any(word in query for word in ['csgo', 'counter', 'cs:go']) else 'valorant'
+            
+            return {
+                'type': 'esports_over_under',
+                'player': player_name,
+                'stat': 'kills',
+                'line': line_value,
+                'direction': direction,
+                'game': game,
+                'original_query': original_query
+            }
+        
+        # NEW: Simple format "Majesticzz 15 kills"
+        simple_kills_match = re.search(self.patterns['simple_kills'], query)
+        if simple_kills_match:
+            player_name = simple_kills_match.group(1).strip()
+            line_value = float(simple_kills_match.group(2))
+            
+            # Clean player name
+            player_name = re.sub(r'^(will|can|is|does)\s+', '', player_name).strip()
+            
+            direction = 'under' if 'under' in query else 'over'
+            game = 'csgo' if any(word in query for word in ['csgo', 'counter', 'cs:go', 'map']) else 'valorant'
+            
+            return {
+                'type': 'esports_over_under',
+                'player': player_name,
+                'stat': 'kills',
+                'line': line_value,
+                'direction': direction,
+                'game': game,
+                'original_query': original_query
             }
         
         # Alternative esports format: "Will [player] [number] kills"
@@ -1353,7 +1444,8 @@ class AdvancedRealDataQuery:
                 'stat': stat_type,
                 'line': line_value,
                 'direction': direction,
-                'game': game
+                'game': game,
+                'original_query': original_query
             }
         
         # NBA Over/Under  
@@ -1370,10 +1462,11 @@ class AdvancedRealDataQuery:
                 'stat': stat_type,
                 'line': line_value,
                 'direction': direction,
-                'game': 'nba'
+                'game': 'nba',
+                'original_query': original_query
             }
         
-        return {'type': 'general', 'query': query}
+        return {'type': 'general', 'query': query, 'original_query': original_query}
     
     async def get_real_esports_prediction(self, parsed_query: Dict) -> Dict[str, Any]:
         """Get esports prediction using ONLY real data"""

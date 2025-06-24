@@ -1,0 +1,55 @@
+{
+  "codebase_audit": {
+    "mock": 0,
+    "synthetic": 0,
+    "random.uniform": 0,
+    "random.choice": 0,
+    "fake": 1,
+    "generated": 0,
+    "real_hltv": true,
+    "real_vlr": true,
+    "real_basketball-reference": true,
+    "real_espn": true
+  },
+  "system_health": {
+    "/system/accuracy": {
+      "status": "error",
+      "http_status": 502
+    },
+    "/chat": {
+      "status": "error",
+      "http_status": 502
+    },
+    "/system/test": {
+      "status": "error",
+      "http_status": 502
+    }
+  },
+  "accuracy_verification": {
+    "csgo_kills_advanced_model.pkl": {
+      "status": "missing"
+    },
+    "valorant_kills_advanced_model.pkl": {
+      "status": "missing"
+    },
+    "nba_points_advanced_model.pkl": {
+      "status": "missing"
+    },
+    "match_outcomes_advanced_model.pkl": {
+      "status": "missing"
+    }
+  },
+  "real_data_validation": {},
+  "performance_test": {
+    "total_requests": 1000,
+    "successful_requests": 0,
+    "success_rate": 0.0,
+    "average_accuracy": 0,
+    "average_response_time": 0,
+    "total_time": 2.104903221130371,
+    "requests_per_second": 475.0812246194302
+  },
+  "five_million_test": {
+    "status": "failed_stability"
+  }
+}

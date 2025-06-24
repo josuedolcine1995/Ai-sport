@@ -294,10 +294,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Sports Agent Chat API"
-    - "Player Analysis & Betting Odds"
-    - "Natural Language Query Processing"
-  stuck_tasks: []
+    - "Bulletproof Web Scraping System"
+    - "Advanced ML Ensemble System"
+  stuck_tasks:
+    - "Bulletproof Web Scraping System"
+    - "Advanced ML Ensemble System"
   test_all: false
   test_priority: "high_first"
 

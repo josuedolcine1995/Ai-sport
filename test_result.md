@@ -137,15 +137,18 @@ backend:
 
   - task: "Natural Language Query Processing"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
         - working: "NA"
           agent: "main"
           comment: "Built rule-based query processor that can parse questions like 'Will LeBron James score over 22 points?' and extract player name, stat type, line value, and direction"
+        - working: true
+          agent: "testing"
+          comment: "Tested natural language query processing with various question types. The system correctly parses over/under questions, player stats requests, team information queries, and recognizes FanDuel/DraftKings lineup requests and parlay building requests. The pattern matching works effectively for all tested query types."
 
   - task: "Chat History & Database Integration"
     implemented: true

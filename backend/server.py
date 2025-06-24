@@ -24,16 +24,31 @@ import joblib
 import random
 import requests
 from bs4 import BeautifulSoup
-import cloudscraper
-from fake_useragent import UserAgent
+try:
+    import cloudscraper
+except ImportError:
+    print("Warning: cloudscraper module not found. Web scraping functionality will be limited.")
+    cloudscraper = None
+
+try:
+    from fake_useragent import UserAgent
+except ImportError:
+    print("Warning: fake_useragent module not found. Using default user agent.")
+    UserAgent = None
+
 import time
 import schedule
 import threading
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
+
+try:
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+except ImportError:
+    print("Warning: selenium module not found. Advanced web scraping will be limited.")
+    webdriver = None
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')

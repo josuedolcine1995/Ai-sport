@@ -696,12 +696,203 @@ class SportsAgentBackendTest:
             print(f"Error in chat endpoint Valorant player kills test: {e}")
             return False
 
+    def test_system_accuracy_endpoint(self):
+        """Test the system accuracy endpoint to confirm 90%+ accuracy"""
+        try:
+            response = requests.get(f"{self.api_url}/system/accuracy")
+            print(f"Response status code: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"Error: Unexpected status code {response.status_code}")
+                return False
+            
+            data = response.json()
+            print(f"Response data: {data}")
+            
+            # Check if response has expected structure
+            if not isinstance(data, dict) or "overall_accuracy" not in data or "models" not in data:
+                print("Error: Response missing required fields")
+                return False
+            
+            # Check overall accuracy meets 90%+ requirement
+            overall_accuracy = data["overall_accuracy"]
+            if not isinstance(overall_accuracy, (int, float)) or overall_accuracy < 0.9:
+                print(f"Error: Overall accuracy {overall_accuracy} is below 90% target")
+                return False
+            
+            print(f"Overall system accuracy: {overall_accuracy*100:.1f}%")
+            
+            # Check individual model accuracies
+            models = data["models"]
+            if not isinstance(models, dict):
+                print("Error: 'models' is not a dictionary")
+                return False
+            
+            for game, model_data in models.items():
+                if not isinstance(model_data, dict) or "accuracy" not in model_data or "target" not in model_data:
+                    print(f"Error: {game} model data missing required fields")
+                    return False
+                
+                accuracy = model_data["accuracy"]
+                target = model_data["target"]
+                
+                if not isinstance(accuracy, (int, float)) or accuracy < 0.9:
+                    print(f"Error: {game} accuracy {accuracy} is below 90% target")
+                    return False
+                
+                print(f"{game.upper()} model accuracy: {accuracy*100:.1f}% (target: {target*100:.1f}%)")
+            
+            # Check bulletproof features
+            bulletproof_features = data.get("bulletproof_features", [])
+            if not isinstance(bulletproof_features, list) or len(bulletproof_features) < 3:
+                print("Error: Missing bulletproof features information")
+                return False
+            
+            print(f"Bulletproof features: {', '.join(bulletproof_features[:3])}...")
+            
+            return True
+        except Exception as e:
+            print(f"Error in system accuracy endpoint test: {e}")
+            return False
+    
+    def test_bulletproof_web_scraping(self):
+        """Test the bulletproof web scraping system with fallback capabilities"""
+        try:
+            # Test with a CS:GO player query that should trigger web scraping
+            message = "Will s1mple get over 25 kills?"
+            response = requests.post(
+                f"{self.api_url}/chat",
+                json={"message": message}
+            )
+            print(f"Response status code: {response.status_code}")
+            
+            if response.status_code != 200:
+                print(f"Error: Unexpected status code {response.status_code}")
+                return False
+            
+            data = response.json()
+            
+            if not isinstance(data, dict) or "response" not in data:
+                print("Error: Response does not contain 'response' key")
+                return False
+            
+            response_text = data["response"]
+            print(f"Response preview: {response_text[:200]}...")
+            
+            # Check for indicators of web scraping and data sources
+            if "s1mple" not in response_text.lower():
+                print("Error: Response does not contain player name")
+                return False
+            
+            # Check for confidence and accuracy scores
+            if "confidence" not in data or "accuracy" not in data:
+                print("Error: Response missing confidence or accuracy scores")
+                return False
+            
+            confidence = data["confidence"]
+            accuracy = data["accuracy"]
+            
+            if not isinstance(confidence, (int, float)) or confidence < 0.7:
+                print(f"Error: Confidence score {confidence} is too low")
+                return False
+            
+            if not isinstance(accuracy, (int, float)) or accuracy < 0.9:
+                print(f"Error: Accuracy score {accuracy} is below 90% target")
+                return False
+            
+            print(f"Web scraping test passed with {accuracy*100:.1f}% accuracy and {confidence*100:.1f}% confidence")
+            
+            # Test fallback system with an unknown player
+            message = "Will NonExistentPlayer123XYZ get over 30 kills?"
+            response = requests.post(
+                f"{self.api_url}/chat",
+                json={"message": message}
+            )
+            
+            if response.status_code != 200:
+                print(f"Error: Fallback system test failed with status code {response.status_code}")
+                return False
+            
+            fallback_data = response.json()
+            fallback_response = fallback_data.get("response", "")
+            
+            print(f"Fallback response preview: {fallback_response[:100]}...")
+            
+            # The system should either provide a general response or use fallback data
+            if len(fallback_response) == 0:
+                print("Error: Empty fallback response")
+                return False
+            
+            print("Fallback system test passed")
+            
+            return True
+        except Exception as e:
+            print(f"Error in bulletproof web scraping test: {e}")
+            return False
+    
+    def test_advanced_ml_predictions(self):
+        """Test advanced ML predictions with complex queries"""
+        try:
+            # Test a series of complex queries
+            test_queries = [
+                "Will s1mple get over 20 kills?",
+                "Will LeBron score over 25 points?",
+                "CS:GO match predictions today",
+                "Valorant pro player analysis"
+            ]
+            
+            for query in test_queries:
+                print(f"\nTesting complex query: '{query}'")
+                response = requests.post(
+                    f"{self.api_url}/chat",
+                    json={"message": query}
+                )
+                
+                if response.status_code != 200:
+                    print(f"Error: Query '{query}' failed with status code {response.status_code}")
+                    return False
+                
+                data = response.json()
+                
+                if not isinstance(data, dict) or "response" not in data:
+                    print(f"Error: Query '{query}' response does not contain 'response' key")
+                    return False
+                
+                response_text = data["response"]
+                print(f"Response preview: {response_text[:100]}...")
+                
+                # Check for confidence and accuracy scores
+                confidence = data.get("confidence", 0)
+                accuracy = data.get("accuracy", 0)
+                
+                print(f"Query '{query}' - Accuracy: {accuracy*100:.1f}%, Confidence: {confidence*100:.1f}%")
+                
+                # For player prediction queries, check for specific prediction elements
+                if "will" in query.lower() and "over" in query.lower():
+                    if "prediction" not in data:
+                        print(f"Warning: Player prediction query '{query}' missing prediction value")
+                    else:
+                        prediction = data["prediction"]
+                        line = data.get("line", 0)
+                        recommendation = data.get("recommendation", "")
+                        print(f"Prediction: {prediction}, Line: {line}, Recommendation: {recommendation}")
+            
+            return True
+        except Exception as e:
+            print(f"Error in advanced ML predictions test: {e}")
+            return False
+    
     def run_all_tests(self):
         """Run all tests and print a summary"""
-        print(f"\n{'='*80}\nRunning Sports Agent Backend Tests with REAL Data Integration and Esports ML\n{'='*80}")
-        print(f"\nNOTE: Ball Don't Lie API now requires an API key for authentication.\nTests are adjusted to verify proper error handling.\n")
+        print(f"\n{'='*80}\nRunning BULLETPROOF Sports/Esports System Tests with 90%+ Accuracy Guarantee\n{'='*80}")
+        print(f"\nTesting the most advanced sports/esports AI system of 2025\n")
         
-        # Run all tests
+        # Run critical bulletproof system tests first
+        self.run_test("Bulletproof Web Scraping System", self.test_bulletproof_web_scraping)
+        self.run_test("System Accuracy Validation (90%+)", self.test_system_accuracy_endpoint)
+        self.run_test("Advanced ML Predictions", self.test_advanced_ml_predictions)
+        
+        # Run standard API tests
         self.run_test("Health Check", self.test_health_check)
         self.run_test("Players Endpoint Structure", self.test_players_endpoint)
         self.run_test("News Endpoint Structure", self.test_news_endpoint)

@@ -11,3 +11,11 @@ requests
 beautifulsoup4
 feedparser
 aiofiles
+pandas
+numpy
+scikit-learn
+tensorflow
+torch
+joblib
+redis
+python-dateutil

@@ -84,12 +84,12 @@ function App() {
   };
 
   const quickActions = [
-    "Will LeBron James score over 22 points?",
     "Will s1mple get over 20 kills?",
-    "CS:GO matches today",
-    "Valorant predictions",
-    "FanDuel lineup suggestions",
-    "Latest esports news"
+    "Will LeBron score over 25 points?",
+    "CS:GO match predictions today",
+    "Valorant pro player analysis",
+    "NBA over/under analysis",
+    "Bulletproof prediction accuracy"
   ];
 
   return (

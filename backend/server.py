@@ -1502,7 +1502,7 @@ class AdvancedRealDataQuery:
             features = self.extract_real_features(player_data, game, stat_type)
             
             # Generate prediction using enhanced logic (while ML models train)
-            base_prediction = self.generate_enhanced_prediction(player_data, game, stat_type, line)
+            base_prediction = self.generate_enhanced_prediction(player_data, game, stat_type, line, parsed_query)
             
             # Generate recommendation
             if direction == 'over':

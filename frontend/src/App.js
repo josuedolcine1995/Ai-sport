@@ -85,9 +85,11 @@ function App() {
 
   const quickActions = [
     "Will LeBron James score over 22 points?",
-    "Stephen Curry stats",
+    "Will s1mple get over 20 kills?",
+    "CS:GO matches today",
+    "Valorant predictions",
     "FanDuel lineup suggestions",
-    "Build me a parlay"
+    "Latest esports news"
   ];
 
   return (

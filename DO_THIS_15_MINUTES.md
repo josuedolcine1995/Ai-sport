@@ -1,6 +1,6 @@
 # ✅ Launch in ~15 minutes — no GitHub, no website hosting, nothing public connects to you but the store itself
 
-New plan: **Lemon Squeezy hosts your entire store for you.** Your store's public address will be something like `launchstack.lemonsqueezy.com` — customers see a clean store page with your products, checkout, and automatic file delivery. GitHub is never visible to anyone; this repo is just our private workshop where the product files live.
+New plan: **Lemon Squeezy hosts your entire store for you.** Your store's public address will be something like `trylaunchstack.lemonsqueezy.com` — customers see a clean store page with your products, checkout, and automatic file delivery. GitHub is never visible to anyone; this repo is just our private workshop where the product files live.
 
 No card is needed anywhere in this process. Don't enter card info to "unlock" anything.
 
@@ -39,7 +39,7 @@ Upload: all files from all three folders
 
 In Lemon Squeezy: **Settings → Stores** → make sure your store page is enabled. Your live store is now at:
 
-**`https://launchstack.lemonsqueezy.com`** ← this is the ONLY link you ever share. It's what goes in your TikTok/Pinterest bio.
+**`https://trylaunchstack.lemonsqueezy.com`** ← this is the ONLY link you ever share. It's what goes in your TikTok/Pinterest bio.
 
 ## PART 4 — Tell Claude it's live
 

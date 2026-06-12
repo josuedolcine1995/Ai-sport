@@ -2,7 +2,7 @@
 
 A zero-cost online store selling digital toolkits for freelancers, side hustlers, and small business owners. No inventory, no shipping, ~97% margin per sale.
 
-**The store itself is hosted by Lemon Squeezy** (e.g. `launchstack.lemonsqueezy.com`) — this repo is just the private workshop holding the product files and launch plan. Nothing here is shown to customers.
+**The store itself is hosted by Lemon Squeezy** (e.g. `trylaunchstack.lemonsqueezy.com`) — this repo is just the private workshop holding the product files and launch plan. Nothing here is shown to customers.
 
 ## What's in this repo
 

@@ -2,23 +2,25 @@
 
 A zero-cost online store selling digital toolkits for freelancers, side hustlers, and small business owners. No inventory, no shipping, ~97% margin per sale.
 
+**The store itself is hosted by Lemon Squeezy** (e.g. `launchstack.lemonsqueezy.com`) — this repo is just the private workshop holding the product files and launch plan. Nothing here is shown to customers.
+
 ## What's in this repo
 
 | Path | What it is |
 |---|---|
-| `index.html` | The storefront — a static site, hosts free on GitHub Pages |
-| `config.js` | The only file to edit: paste your checkout links + support email |
-| `products/ai-prompt-vault/` | Product 1: 100+ AI prompts for small business — sells for $19 |
+| `DO_THIS_15_MINUTES.md` | **Start here** — the copy-paste launch checklist |
+| `products/ai-prompt-vault/` | Product 1: 105 AI prompts for small business — sells for $19 |
 | `products/freelancer-client-kit/` | Product 2: contract, proposal, invoice, onboarding templates — $24 |
 | `products/budget-tracker/` | Product 3: printable budget + savings + debt planner — $12 |
-| `LAUNCH_GUIDE.md` | Step-by-step: from this repo to taking payments, in one afternoon, for $0 |
 | `MARKETING_PLAYBOOK.md` | The free-traffic plan for the first 30 days |
+| `index.html` + `config.js` + `thanks.html` | Optional custom storefront for later (deployable on Netlify free tier) — not needed to launch |
+| `scripts/create_stripe_products.sh` | Optional Stripe automation for later |
 
 ## Status
 
-- [x] Storefront built
 - [x] 3 products + bundle created
-- [ ] Seller account created (Lemon Squeezy / Stripe) — **your move, see LAUNCH_GUIDE.md step 1**
-- [ ] Checkout links pasted into `config.js`
-- [ ] GitHub Pages enabled
+- [x] Launch checklist + marketing playbook written
+- [ ] Lemon Squeezy account created + verified — **your move, see DO_THIS_15_MINUTES.md**
+- [ ] 4 products uploaded & published
+- [ ] Store link shared in TikTok/Pinterest bios
 - [ ] First sale 🎉

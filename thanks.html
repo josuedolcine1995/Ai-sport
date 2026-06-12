@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thank you! Your downloads — LaunchStack</title>
+  <meta name="robots" content="noindex" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="config.js"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased">
+  <div class="max-w-2xl mx-auto px-6 py-20 text-center">
+    <div class="text-6xl mb-6">🎉</div>
+    <h1 class="text-4xl font-extrabold mb-4">You're in. Thank you!</h1>
+    <p class="text-slate-400 mb-10">Payment confirmed — your files are below. Bookmark this page; your purchase includes lifetime updates, so these links always serve the latest version.</p>
+    <div id="downloads" class="space-y-4 text-left"></div>
+    <p class="text-slate-500 text-sm mt-12">Problem with your download? Email <span id="support"></span> with your receipt and we'll fix it fast.</p>
+  </div>
+
+  <script>
+    const CATALOG = {
+      promptVault: {
+        name: "🤖 AI Prompt Vault for Small Business",
+        files: [["AI Prompt Vault (open, then print → Save as PDF)", "products/ai-prompt-vault/AI-Prompt-Vault.md"]]
+      },
+      clientKit: {
+        name: "💼 Freelancer Client Kit",
+        files: [
+          ["1 — Service Contract Template", "products/freelancer-client-kit/1-Service-Contract-Template.md"],
+          ["2 — Winning Proposal Template", "products/freelancer-client-kit/2-Winning-Proposal-Template.md"],
+          ["3 — Invoice Template (open in browser, save as PDF)", "products/freelancer-client-kit/3-Invoice-Template.html"],
+          ["4 — Client Onboarding Checklist", "products/freelancer-client-kit/4-Client-Onboarding-Checklist.md"]
+        ]
+      },
+      budgetTracker: {
+        name: "💰 Money Reset: Budget & Savings Tracker",
+        files: [
+          ["Printable Pack (open in browser, print or save as PDF)", "products/budget-tracker/Money-Reset-Printable-Pack.html"],
+          ["Budget Spreadsheet (import into Google Sheets/Excel)", "products/budget-tracker/Monthly-Budget-Spreadsheet.csv"]
+        ]
+      }
+    };
+    CATALOG.bundle = {
+      name: "🔥 The Everything Bundle",
+      files: [...CATALOG.promptVault.files, ...CATALOG.clientKit.files, ...CATALOG.budgetTracker.files]
+    };
+
+    const key = new URLSearchParams(location.search).get("p");
+    const items = CATALOG[key] ? [CATALOG[key]] : Object.values(CATALOG).slice(0, 3);
+    document.getElementById("downloads").innerHTML = items.map(p => `
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <h2 class="font-bold text-lg mb-4">${p.name}</h2>
+        ${p.files.map(([label, href]) => `
+          <a href="${href}" download class="block bg-indigo-600 hover:bg-indigo-500 transition rounded-lg px-4 py-3 mb-2 text-sm font-medium">⬇ ${label}</a>`).join("")}
+      </div>`).join("");
+
+    if (window.STORE_CONFIG && window.STORE_CONFIG.supportEmail) {
+      document.getElementById("support").textContent = window.STORE_CONFIG.supportEmail;
+    }
+  </script>
+</body>
+</html>

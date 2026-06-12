@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Invoice</title>
+<style>
+  /* HOW TO USE: edit the [BRACKETED] text below, open this file in your browser,
+     then press Ctrl/Cmd+P and "Save as PDF" to send a polished invoice. */
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a202c; max-width: 760px; margin: 40px auto; padding: 0 24px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 48px; }
+  h1 { font-size: 40px; letter-spacing: 2px; margin: 0; color: #4f46e5; }
+  .meta { text-align: right; font-size: 14px; color: #4a5568; line-height: 1.7; }
+  .parties { display: flex; gap: 64px; margin-bottom: 40px; font-size: 14px; line-height: 1.7; }
+  .label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #a0aec0; margin-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; padding: 12px 8px; border-bottom: 2px solid #4f46e5; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #4a5568; }
+  td { padding: 14px 8px; border-bottom: 1px solid #e2e8f0; }
+  .num { text-align: right; }
+  .totals { margin-top: 16px; margin-left: auto; width: 280px; font-size: 14px; }
+  .totals div { display: flex; justify-content: space-between; padding: 6px 8px; }
+  .totals .due { font-weight: bold; font-size: 18px; border-top: 2px solid #1a202c; margin-top: 6px; padding-top: 12px; }
+  .pay { margin-top: 48px; background: #f7fafc; border-left: 4px solid #4f46e5; padding: 16px 20px; font-size: 14px; line-height: 1.7; }
+  .thanks { margin-top: 40px; font-size: 13px; color: #718096; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <h1>INVOICE</h1>
+      <p style="font-size:14px; color:#4a5568; margin-top:8px;">[YOUR NAME / BUSINESS NAME]<br>[your@email.com] · [phone]<br>[website.com]</p>
+    </div>
+    <div class="meta">
+      <strong>Invoice #:</strong> [2026-001]<br>
+      <strong>Date:</strong> [DATE]<br>
+      <strong>Due:</strong> [DATE — e.g., Net 7]
+    </div>
+  </div>
+
+  <div class="parties">
+    <div>
+      <div class="label">Billed To</div>
+      [CLIENT NAME]<br>[COMPANY]<br>[ADDRESS]<br>[client@email.com]
+    </div>
+    <div>
+      <div class="label">Project</div>
+      [PROJECT NAME / REFERENCE]
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Description</th><th class="num">Qty/Hrs</th><th class="num">Rate</th><th class="num">Amount</th></tr>
+    <tr><td>[Deliverable or service description]</td><td class="num">[1]</td><td class="num">$[0.00]</td><td class="num">$[0.00]</td></tr>
+    <tr><td>[Deliverable or service description]</td><td class="num">[1]</td><td class="num">$[0.00]</td><td class="num">$[0.00]</td></tr>
+    <tr><td>[Deliverable or service description]</td><td class="num">[1]</td><td class="num">$[0.00]</td><td class="num">$[0.00]</td></tr>
+  </table>
+
+  <div class="totals">
+    <div><span>Subtotal</span><span>$[0.00]</span></div>
+    <div><span>Tax ([0]%)</span><span>$[0.00]</span></div>
+    <div><span>Deposit received</span><span>−$[0.00]</span></div>
+    <div class="due"><span>Amount Due</span><span>$[0.00]</span></div>
+  </div>
+
+  <div class="pay">
+    <strong>How to pay:</strong><br>
+    [Payment link, e.g., Stripe/PayPal URL]<br>
+    [Or bank details: Account name / number / routing]
+    <br><br>
+    <em>Payments later than [7] days past the due date accrue [1.5]% monthly interest.</em>
+  </div>
+
+  <p class="thanks">Thank you for your business! Questions about this invoice? Email [your@email.com].</p>
+</body>
+</html>

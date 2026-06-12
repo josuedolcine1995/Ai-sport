@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Money Reset — Budget & Savings Tracker</title>
+<style>
+  /* HOW TO USE: open in any browser → Ctrl/Cmd+P → "Save as PDF" or print.
+     Each section is one printable page. */
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #1a202c; margin: 0; }
+  .page { max-width: 720px; margin: 0 auto; padding: 48px 32px; page-break-after: always; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .sub { color: #718096; font-size: 13px; margin-bottom: 28px; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 1px; color: #4f46e5; border-bottom: 2px solid #4f46e5; padding-bottom: 6px; margin: 28px 0 12px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 6px; background: #eef2ff; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+  td { padding: 11px 6px; border-bottom: 1px solid #e2e8f0; }
+  .fill { color: #cbd5e0; }
+  .grid52 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-size: 11px; }
+  .wk { border: 1px solid #cbd5e0; border-radius: 6px; padding: 6px 8px; display: flex; justify-content: space-between; }
+  .wk span:last-child { color: #94a3b8; }
+  .box { border: 2px solid #1a202c; border-radius: 8px; padding: 14px; margin-top: 16px; font-size: 14px; display: flex; justify-content: space-between; font-weight: bold; }
+  .tip { background: #f7fafc; border-left: 4px solid #4f46e5; padding: 10px 14px; font-size: 12px; color: #4a5568; margin-top: 20px; }
+  .check { width: 18px; height: 18px; border: 2px solid #4f46e5; border-radius: 4px; display: inline-block; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: MONTHLY BUDGET -->
+<div class="page">
+  <h1>💰 Monthly Budget — Month of ____________</h1>
+  <p class="sub">The Money Reset rule: every dollar gets a job before the month starts.</p>
+
+  <h2>Income</h2>
+  <table>
+    <tr><th>Source</th><th style="width:120px">Expected</th><th style="width:120px">Actual</th></tr>
+    <tr><td>Paycheck 1</td><td class="fill">$</td><td class="fill">$</td></tr>
+    <tr><td>Paycheck 2</td><td class="fill">$</td><td class="fill">$</td></tr>
+    <tr><td>Side hustle</td><td class="fill">$</td><td class="fill">$</td></tr>
+    <tr><td>Other</td><td class="fill">$</td><td class="fill">$</td></tr>
+    <tr><td><strong>Total income</strong></td><td class="fill">$</td><td class="fill">$</td></tr>
+  </table>
+
+  <h2>Fixed bills (the must-pays)</h2>
+  <table>
+    <tr><th>Bill</th><th style="width:90px">Due date</th><th style="width:100px">Amount</th><th style="width:60px">Paid?</th></tr>
+    <tr><td>Rent / mortgage</td><td class="fill"></td><td class="fill">$</td><td><span class="check"></span></td></tr>
+    <tr><td>Utilities</td><td class="fill"></td><td class="fill">$</td><td><span class="check"></span></td></tr>
+    <tr><td>Phone / internet</td><td class="fill"></td><td class="fill">$</td><td><span class="check"></span></td></tr>
+    <tr><td>Insurance</td><td class="fill"></td><td class="fill">$</td><td><span class="check"></span></td></tr>
+    <tr><td>Transport / car</td><td class="fill"></td><td class="fill">$</td><td><span class="check"></span></td></tr>
+    <tr><td>Subscriptions (list them — all of them)</td><td class="fill"></td><td class="fill">$</td><td><span class="check"></span></td></tr>
+    <tr><td>Minimum debt payments</td><td class="fill"></td><td class="fill">$</td><td><span class="check"></span></td></tr>
+  </table>
+
+  <h2>Flexible spending</h2>
+  <table>
+    <tr><th>Category</th><th style="width:100px">Budget</th><th style="width:100px">Actual</th><th style="width:100px">Diff (+/−)</th></tr>
+    <tr><td>Groceries</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+    <tr><td>Eating out</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+    <tr><td>Fun / entertainment</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+    <tr><td>Personal / clothing</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+    <tr><td>Other</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+  </table>
+
+  <div class="box"><span>Income − bills − spending = TO SAVINGS:</span><span class="fill">$</span></div>
+  <p class="tip">💡 If the number above is negative, cut from "Flexible" first — fixed bills take a phone call, flexible takes a decision.</p>
+</div>
+
+<!-- PAGE 2: 52-WEEK SAVINGS CHALLENGE -->
+<div class="page">
+  <h1>📈 52-Week Savings Challenge</h1>
+  <p class="sub">Save the week-number in dollars each week (week 1 = $1 … week 52 = $52). Check the box when banked. Finish all 52 and you'll have <strong>$1,378</strong>. Tight month? Swap a high week for a low one — just cross them off.</p>
+  <h2>Weeks 1–52</h2>
+  <div class="grid52">
+    <div class="wk"><span>☐ Wk 1</span><span>$1</span></div><div class="wk"><span>☐ Wk 2</span><span>$2</span></div><div class="wk"><span>☐ Wk 3</span><span>$3</span></div><div class="wk"><span>☐ Wk 4</span><span>$4</span></div>
+    <div class="wk"><span>☐ Wk 5</span><span>$5</span></div><div class="wk"><span>☐ Wk 6</span><span>$6</span></div><div class="wk"><span>☐ Wk 7</span><span>$7</span></div><div class="wk"><span>☐ Wk 8</span><span>$8</span></div>
+    <div class="wk"><span>☐ Wk 9</span><span>$9</span></div><div class="wk"><span>☐ Wk 10</span><span>$10</span></div><div class="wk"><span>☐ Wk 11</span><span>$11</span></div><div class="wk"><span>☐ Wk 12</span><span>$12</span></div>
+    <div class="wk"><span>☐ Wk 13</span><span>$13</span></div><div class="wk"><span>☐ Wk 14</span><span>$14</span></div><div class="wk"><span>☐ Wk 15</span><span>$15</span></div><div class="wk"><span>☐ Wk 16</span><span>$16</span></div>
+    <div class="wk"><span>☐ Wk 17</span><span>$17</span></div><div class="wk"><span>☐ Wk 18</span><span>$18</span></div><div class="wk"><span>☐ Wk 19</span><span>$19</span></div><div class="wk"><span>☐ Wk 20</span><span>$20</span></div>
+    <div class="wk"><span>☐ Wk 21</span><span>$21</span></div><div class="wk"><span>☐ Wk 22</span><span>$22</span></div><div class="wk"><span>☐ Wk 23</span><span>$23</span></div><div class="wk"><span>☐ Wk 24</span><span>$24</span></div>
+    <div class="wk"><span>☐ Wk 25</span><span>$25</span></div><div class="wk"><span>☐ Wk 26</span><span>$26</span></div><div class="wk"><span>☐ Wk 27</span><span>$27</span></div><div class="wk"><span>☐ Wk 28</span><span>$28</span></div>
+    <div class="wk"><span>☐ Wk 29</span><span>$29</span></div><div class="wk"><span>☐ Wk 30</span><span>$30</span></div><div class="wk"><span>☐ Wk 31</span><span>$31</span></div><div class="wk"><span>☐ Wk 32</span><span>$32</span></div>
+    <div class="wk"><span>☐ Wk 33</span><span>$33</span></div><div class="wk"><span>☐ Wk 34</span><span>$34</span></div><div class="wk"><span>☐ Wk 35</span><span>$35</span></div><div class="wk"><span>☐ Wk 36</span><span>$36</span></div>
+    <div class="wk"><span>☐ Wk 37</span><span>$37</span></div><div class="wk"><span>☐ Wk 38</span><span>$38</span></div><div class="wk"><span>☐ Wk 39</span><span>$39</span></div><div class="wk"><span>☐ Wk 40</span><span>$40</span></div>
+    <div class="wk"><span>☐ Wk 41</span><span>$41</span></div><div class="wk"><span>☐ Wk 42</span><span>$42</span></div><div class="wk"><span>☐ Wk 43</span><span>$43</span></div><div class="wk"><span>☐ Wk 44</span><span>$44</span></div>
+    <div class="wk"><span>☐ Wk 45</span><span>$45</span></div><div class="wk"><span>☐ Wk 46</span><span>$46</span></div><div class="wk"><span>☐ Wk 47</span><span>$47</span></div><div class="wk"><span>☐ Wk 48</span><span>$48</span></div>
+    <div class="wk"><span>☐ Wk 49</span><span>$49</span></div><div class="wk"><span>☐ Wk 50</span><span>$50</span></div><div class="wk"><span>☐ Wk 51</span><span>$51</span></div><div class="wk"><span>☐ Wk 52</span><span>$52</span></div>
+  </div>
+  <div class="box"><span>Finished total:</span><span>$1,378 🎉</span></div>
+  <p class="tip">💡 Hard mode: do it in reverse ($52 first) — the challenge gets easier as the year goes on, not harder.</p>
+</div>
+
+<!-- PAGE 3: DEBT SNOWBALL -->
+<div class="page">
+  <h1>🏔️ Debt Snowball Planner</h1>
+  <p class="sub">List debts smallest to largest. Pay minimums on everything, throw every spare dollar at the smallest. When it dies, roll its payment into the next one. Momentum &gt; math.</p>
+  <h2>My debts (smallest balance first)</h2>
+  <table>
+    <tr><th>#</th><th>Debt</th><th>Balance</th><th>Min payment</th><th>+ Snowball</th><th>Paid off! 🎉 (date)</th></tr>
+    <tr><td>1</td><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+    <tr><td>2</td><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+    <tr><td>3</td><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+    <tr><td>4</td><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+    <tr><td>5</td><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+    <tr><td>6</td><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td><td class="fill"></td></tr>
+  </table>
+  <h2>Monthly check-in</h2>
+  <table>
+    <tr><th>Month</th><th>Total debt at start</th><th>Total paid this month</th><th>Total debt now</th></tr>
+    <tr><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td></tr>
+    <tr><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td></tr>
+    <tr><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td></tr>
+    <tr><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td></tr>
+    <tr><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td></tr>
+    <tr><td class="fill"></td><td class="fill">$</td><td class="fill">$</td><td class="fill">$</td></tr>
+  </table>
+  <div class="box"><span>Debt-free date I'm gunning for:</span><span class="fill">____ / ____ / ______</span></div>
+  <p class="tip">💡 Every $19 you don't spend on junk this week is a brick out of the wall. Print page 1 monthly, this page once.</p>
+</div>
+
+</body>
+</html>

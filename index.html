@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LaunchStack — Digital Tools for Side Hustlers & Freelancers</title>
+  <meta name="description" content="Done-for-you digital toolkits: AI prompt packs, freelancer contracts, and budget trackers. Instant download. Built to save you hours and make you money." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="config.js"></script>
+  <style>
+    .gradient-text { background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .card-glow:hover { box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.4); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased">
+
+  <!-- Nav -->
+  <nav class="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
+    <div class="text-xl font-bold tracking-tight">⚡ Launch<span class="gradient-text">Stack</span></div>
+    <a href="#products" class="text-sm bg-indigo-600 hover:bg-indigo-500 transition px-4 py-2 rounded-lg font-medium">Shop Toolkits</a>
+  </nav>
+
+  <!-- Hero -->
+  <header class="max-w-4xl mx-auto px-6 pt-16 pb-20 text-center">
+    <p class="text-indigo-400 text-sm font-semibold uppercase tracking-widest mb-4">Instant download · Lifetime access</p>
+    <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
+      Skip the busywork.<br /><span class="gradient-text">Start earning faster.</span>
+    </h1>
+    <p class="text-slate-400 text-lg max-w-2xl mx-auto mb-8">
+      Done-for-you digital toolkits for freelancers, side hustlers, and small business owners.
+      Battle-tested templates and AI prompts that save you 10+ hours a week — delivered to your inbox in 60 seconds.
+    </p>
+    <a href="#products" class="inline-block bg-indigo-600 hover:bg-indigo-500 transition px-8 py-4 rounded-xl font-semibold text-lg">Browse the Toolkits ↓</a>
+  </header>
+
+  <!-- Trust bar -->
+  <div class="border-y border-slate-800 bg-slate-900/50">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap justify-center gap-x-10 gap-y-2 text-sm text-slate-400">
+      <span>✅ Instant digital delivery</span>
+      <span>🔒 Secure checkout</span>
+      <span>♾️ Lifetime updates included</span>
+      <span>💸 7-day money-back guarantee</span>
+    </div>
+  </div>
+
+  <!-- Products -->
+  <section id="products" class="max-w-6xl mx-auto px-6 py-20">
+    <h2 class="text-3xl font-bold text-center mb-3">The Toolkits</h2>
+    <p class="text-slate-400 text-center mb-12">Pick one, or grab the bundle and save.</p>
+
+    <div class="grid md:grid-cols-3 gap-8">
+
+      <!-- Product 1 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col card-glow transition">
+        <div class="text-4xl mb-4">🤖</div>
+        <h3 class="text-xl font-bold mb-2">AI Prompt Vault for Small Business</h3>
+        <p class="text-slate-400 text-sm flex-grow mb-6">
+          100+ copy-paste ChatGPT &amp; Claude prompts organized into 10 categories — marketing, sales, social media,
+          customer service, and more. Stop staring at a blank chat box and start producing like a 5-person team.
+        </p>
+        <ul class="text-sm text-slate-300 space-y-2 mb-6">
+          <li>✔ 100+ professional prompts</li>
+          <li>✔ 10 business categories</li>
+          <li>✔ Fill-in-the-blank format</li>
+        </ul>
+        <div class="text-3xl font-extrabold mb-4">$19</div>
+        <button onclick="buy('promptVault')" class="bg-indigo-600 hover:bg-indigo-500 transition w-full py-3 rounded-xl font-semibold">Get Instant Access</button>
+      </div>
+
+      <!-- Product 2 -->
+      <div class="bg-slate-900 border-2 border-indigo-500 rounded-2xl p-8 flex flex-col relative card-glow transition">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-500 text-xs font-bold px-3 py-1 rounded-full">MOST POPULAR</div>
+        <div class="text-4xl mb-4">💼</div>
+        <h3 class="text-xl font-bold mb-2">Freelancer Client Kit</h3>
+        <p class="text-slate-400 text-sm flex-grow mb-6">
+          Everything you need to look professional and get paid on time: a client contract template, winning proposal
+          template, polished invoice, and a client onboarding checklist. Close bigger clients with confidence.
+        </p>
+        <ul class="text-sm text-slate-300 space-y-2 mb-6">
+          <li>✔ Service contract template</li>
+          <li>✔ Proposal that wins clients</li>
+          <li>✔ Professional invoice + onboarding flow</li>
+        </ul>
+        <div class="text-3xl font-extrabold mb-4">$24</div>
+        <button onclick="buy('clientKit')" class="bg-indigo-600 hover:bg-indigo-500 transition w-full py-3 rounded-xl font-semibold">Get Instant Access</button>
+      </div>
+
+      <!-- Product 3 -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col card-glow transition">
+        <div class="text-4xl mb-4">💰</div>
+        <h3 class="text-xl font-bold mb-2">Money Reset: Budget &amp; Savings Tracker</h3>
+        <p class="text-slate-400 text-sm flex-grow mb-6">
+          A dead-simple monthly budget system: printable budget sheets, a 52-week savings challenge tracker, and a
+          debt payoff planner. Know exactly where every dollar goes.
+        </p>
+        <ul class="text-sm text-slate-300 space-y-2 mb-6">
+          <li>✔ Monthly budget worksheet</li>
+          <li>✔ 52-week savings challenge</li>
+          <li>✔ Debt snowball planner</li>
+        </ul>
+        <div class="text-3xl font-extrabold mb-4">$12</div>
+        <button onclick="buy('budgetTracker')" class="bg-indigo-600 hover:bg-indigo-500 transition w-full py-3 rounded-xl font-semibold">Get Instant Access</button>
+      </div>
+    </div>
+
+    <!-- Bundle -->
+    <div class="mt-12 bg-gradient-to-r from-indigo-900/60 to-purple-900/60 border border-indigo-700 rounded-2xl p-8 md:flex items-center justify-between">
+      <div class="mb-6 md:mb-0">
+        <h3 class="text-2xl font-bold mb-2">🔥 The Everything Bundle</h3>
+        <p class="text-slate-300 text-sm max-w-xl">All three toolkits — the AI Prompt Vault, Freelancer Client Kit, and Money Reset Tracker — for less than the price of two. The complete starter stack for your hustle.</p>
+      </div>
+      <div class="text-center md:text-right">
+        <div class="text-slate-400 line-through text-lg">$55</div>
+        <div class="text-4xl font-extrabold mb-3">$39</div>
+        <button onclick="buy('bundle')" class="bg-white text-slate-900 hover:bg-slate-200 transition px-8 py-3 rounded-xl font-bold">Get the Bundle</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="max-w-3xl mx-auto px-6 pb-20">
+    <h2 class="text-3xl font-bold text-center mb-10">Questions, answered</h2>
+    <div class="space-y-4">
+      <details class="bg-slate-900 border border-slate-800 rounded-xl p-5"><summary class="font-semibold cursor-pointer">How do I receive my purchase?</summary><p class="text-slate-400 text-sm mt-3">Instantly. As soon as your payment goes through, your download links arrive by email and on the confirmation page. No shipping, no waiting.</p></details>
+      <details class="bg-slate-900 border border-slate-800 rounded-xl p-5"><summary class="font-semibold cursor-pointer">What format are the files?</summary><p class="text-slate-400 text-sm mt-3">Clean, editable documents and print-ready sheets that work on any device — no special software required.</p></details>
+      <details class="bg-slate-900 border border-slate-800 rounded-xl p-5"><summary class="font-semibold cursor-pointer">What if it's not for me?</summary><p class="text-slate-400 text-sm mt-3">Every purchase comes with a 7-day money-back guarantee. Email us and we'll refund you, no questions asked.</p></details>
+      <details class="bg-slate-900 border border-slate-800 rounded-xl p-5"><summary class="font-semibold cursor-pointer">Do I get future updates?</summary><p class="text-slate-400 text-sm mt-3">Yes — every toolkit includes lifetime updates. When we improve a product, you get the new version free.</p></details>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 py-10 text-center text-sm text-slate-500">
+    <p class="mb-2">⚡ LaunchStack — digital tools for people building something.</p>
+    <p id="contact-line"></p>
+  </footer>
+
+  <script>
+    function buy(productKey) {
+      const url = (window.STORE_CONFIG && window.STORE_CONFIG.checkoutLinks[productKey]) || "";
+      if (url) { window.location.href = url; }
+      else { alert("Checkout is being set up — check back in a few hours! "); }
+    }
+    if (window.STORE_CONFIG && window.STORE_CONFIG.supportEmail) {
+      document.getElementById("contact-line").textContent = "Support: " + window.STORE_CONFIG.supportEmail;
+    }
+  </script>
+</body>
+</html>
